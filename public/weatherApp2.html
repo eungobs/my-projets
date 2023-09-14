@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: skyblue;
+    }
+    
+    .border-container {
+      border: 4px solid red;
+      padding: 20px;
+    }
+
+    .weather-container {
+      position: relative;
+      text-align: center;
+    }
+    .sun-emoji {
+      font-size: 100px;
+    }
+    .current-time {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+    .temperature-unit {
+      display: inline-block;
+      margin-left: 10px;
+      cursor: pointer;
+      color: blue;
+    }
+    .temperature-unit:hover {
+      text-decoration: underline;
+    }
+    .temperature-overlay {
+      position: relative;
+      margin-top: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 5px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease-in-out;
+    }
+    .temperature-overlay:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="border-container">
+    <div class="weather-container">
+      <h1>Weather in South Africa</h1>
+      <div class="city-input">
+        <input type="text" id="cityInput" placeholder="Enter a city">
+        <button id="searchBtn">Search</button>
+      </div>
+      <div class="current-location">
+        <button id="getLocationBtn">Get Current Location</button>
+      </div>
+      <div class="sun-emoji" id="sunEmoji">☀️</div>
+      <div class="current-time" id="currentTime">Current Time: 00:00</div>
+      <div class="current-date" id="currentDate"></div>
+      <div class="weather-card">
+        <div class="weather-info">
+          <p id="weatherLocation"></p>
+          <p id="temperature"></p>
+          <p id="humidity"></p>
+        </div>
+      </div>
+      <div class="temperature-overlay" id="temperatureOverlay">
+        <p id="temperatureValue">Temperature: 30°C <span class="temperature-unit" id="unitToggle">| °F</span></p>
+      </div>
+      <p>Weather created by <a href="https://github.com/eungobs/workspace">Elizabeth Eunice Ndzukule</a> - @2023</p>
+    </div>
+  </div> 
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cityInput = document.getElementById("cityInput");
+      const searchBtn = document.getElementById("searchBtn");
+      const getLocationBtn = document.getElementById("getLocationBtn");
+      const weatherLocation = document.getElementById("weatherLocation");
+      const temperature = document.getElementById("temperature");
+      const humidity = document.getElementById("humidity");
+      const temperatureOverlay = document.getElementById("temperatureOverlay");
+      const currentTime = document.getElementById("currentTime");
+      const currentDate = document.getElementById("currentDate");
+      const sunEmoji = document.getElementById("sunEmoji");
+      const unitToggle = document.getElementById("unitToggle");
+
+      let isCelsius = true;
+
+      searchBtn.addEventListener("click", () => {
+        const city = cityInput.value;
+        if (city) {
+          fetchWeather(city);
+        }
+      });
+
+      getLocationBtn.addEventListener("click", () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            fetchWeatherByCoordinates(latitude, longitude);
+          }, (error) => {
+            console.error("Error getting current location:", error);
+          });
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+        }
+      });
+
+      unitToggle.addEventListener("click", () => {
+        isCelsius = !isCelsius;
+        updateTemperatureUnit();
+      });
+
+      function fetchWeather(city) {
+        const apiKey = "3ed565296c19775878a64c31457d90b2";
+        const units = isCelsius ? "metric" : "imperial";
+        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${units}`;
+
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => {
+            weatherLocation.textContent = `Weather in ${data.name}, ${data.sys.country}`;
+            temperature.textContent = `Temperature: ${data.main.temp}°${isCelsius ? "C" : "F"}`;
+            humidity.textContent = `Humidity: ${data.main.humidity}%`;
+            temperatureOverlay.style.display = "block";
+            temperatureOverlay.textContent = `Temperature: ${data.main.temp}°${isCelsius ? "C" : "F"}`;
+            updateWeatherEmoji(data.weather[0].main);
+            updateCurrentDate();
+          })
+          .catch(error => {
+            console.error("Error fetching weather data:", error);
+            temperatureOverlay.style.display = "none";
+          });
+      }
+
+      function fetchWeatherByCoordinates(latitude, longitude) {
+        const apiKey = "3ed565296c19775878a64c31457d90b2";
+        const units = isCelsius ? "metric" : "imperial";
+        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=${units}`;
+
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => {
+            weatherLocation.textContent = `Weather in ${data.name}, ${data.sys.country}`;
+            temperature.textContent = `Temperature: ${data.main.temp}°${isCelsius ? "C" : "F"}`;
+            humidity.textContent = `Humidity: ${data.main.humidity}%`;
+            temperatureOverlay.style.display = "block";
+            temperatureOverlay.textContent = `Temperature: ${data.main.temp}°${isCelsius ? "C" : "F"}`;
+            updateWeatherEmoji(data.weather[0].main);
+            updateCurrentDate();
+          })
+          .catch(error => {
+            console.error("Error fetching weather data:", error);
+            temperatureOverlay.style.display = "none";
+          });
+      }
+
+      function updateCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        currentTime.textContent = `Current Time: ${hours}:${minutes}`;
+      }
+
+      function updateCurrentDate() {
+        const now = new Date();
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        currentDate.textContent = now.toLocaleDateString("en-US", options);
+      }
+
+      function updateTemperatureUnit() {
+        const unitText = isCelsius ? "°C" : "°F";
+        temperature.textContent = `Temperature: ${getConvertedTemperature()}${unitText}`;
+        temperatureOverlay.textContent = `Temperature: ${getConvertedTemperature()}${unitText}`;
+        temperatureOverlay.style.display = "block";
+        unitToggle.textContent = `| ${unitText}`;
+      }
+
+      function getConvertedTemperature() {
+        return isCelsius ? temperatureInCelsius : temperatureInFahrenheit;
+      }
+
+      function updateWeatherEmoji(weatherCondition) {
+        const emojiMapping = {
+          Clear: "☀️",
+          Clouds: "☁️",
+          Rain: "🌧️",
+          Snow: "❄️",
+          Thunderstorm: "⛈️",
+          Drizzle: "🌦️",
+          Mist: "🌫️",
+          Smoke: "🌫️",
+          Haze: "🌫️",
+          Dust: "🌫️",
+          Fog: "🌫️",
+          Sand: "🌫️",
+          Ash: "🌫️",
+          Tornado: "🌪️",
+        };
+
+        const emoji = emojiMapping[weatherCondition] || "❓";
+        sunEmoji.textContent = emoji;
+      }
+
+      updateCurrentTime();
+      updateCurrentDate();
+      updateTemperatureUnit();
+    });
+  </script>
+</body>
+</html>
