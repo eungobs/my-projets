@@ -20,12 +20,10 @@
         font-weight: bold;
       }
 
-      /* Set the text color to red for specific elements */
       .red-text {
         color: red;
       }
 
-      /* Style for the weather cards */
       .day-card {
         display: flex;
         flex-direction: column;
@@ -89,7 +87,7 @@
           fetchWeather(city);
           fetchCityTime(city);
           fetchFiveDayForecast(city);
-          updateSunnyEmoji(city); // Update the sunny emoji when the city changes
+          updateSunnyEmoji(city); 
         }
       });
 
@@ -108,32 +106,24 @@
           console.error("Geolocation is not supported by this browser.");
         }
       });
-
-      // Function to fetch the current weather
       function fetchWeather(city) {
-        // Use your API key
         const units = isCelsius ? "metric" : "imperial";
         const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${units}&appid=${apiKey}`;
 
         fetch(apiUrl)
           .then(response => response.json())
           .then(data => {
-            // Display current weather data
             const temperature = data.main.temp;
             const humidity = data.main.humidity;
-            // Update the relevant DOM elements with this data
             document.getElementById("temperature").textContent = `Temperature: ${temperature}°${isCelsius ? "C" : "F"}`;
             document.getElementById("humidity").textContent = `Humidity: ${humidity}%`;
-            // ... (You can add more data as needed)
+            
           })
           .catch(error => {
             console.error("Error fetching current weather data:", error);
           });
       }
-
-      // Function to fetch the 5-day forecast
       function fetchFiveDayForecast(city) {
-        // Use your API key
         const units = isCelsius ? "metric" : "imperial";
         const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${units}&appid=${apiKey}`;
 
@@ -141,19 +131,16 @@
           .then(response => response.json())
           .then(data => {
             // Display 5-day forecast data
-            const forecastList = data.list.slice(0, 5); // Get the next 5 days
+            const forecastList = data.list.slice(0, 5); 
             // Define the day names
             const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu"];
-            // Loop through the forecast data and add it to the DOM
             for (let i = 0; i < forecastList.length; i++) {
               const forecast = forecastList[i];
-              const date = new Date(forecast.dt * 1000); // Convert timestamp to date
-              const dayOfWeek = dayNames[i]; // Get the day name
+              const date = new Date(forecast.dt * 1000); 
+              const dayOfWeek = dayNames[i]; 
               const temperature = forecast.main.temp;
               const humidity = forecast.main.humidity;
               const weatherEmoji = getWeatherEmoji(forecast.weather[0].main);
-
-              // Create a card for each day's forecast
               const dayCard = document.createElement("div");
               dayCard.classList.add("day-card");
               dayCard.innerHTML = `
@@ -162,8 +149,6 @@
                 <p class="emoji">${weatherEmoji}</p>
                 <p class="humidity">Humidity: ${humidity}%</p>
               `;
-
-              // Add a click event listener to change card color
               dayCard.addEventListener("click", () => {
                 dayCard.style.backgroundColor = getRandomColor();
               });
@@ -175,19 +160,13 @@
             console.error("Error fetching 5-day forecast data:", error);
           });
       }
-
-      // Function to update the sunny emoji based on the city
       function updateSunnyEmoji(city) {
         // You can customize this logic to determine when it's sunny based on the city
         const isSunny = city.toLowerCase() === "sunny";
         const sunnyEmoji = document.getElementById("sunEmoji");
         sunnyEmoji.textContent = isSunny ? "☀️" : "☁️";
       }
-
-      // Function to fetch the current time in the specified city
       function fetchCityTime(city) {
-        // Use an appropriate API to get the current time in the specified city
-        // You can replace this with your preferred time API
         fetch(`http://worldtimeapi.org/api/timezone/${city}`)
           .then(response => response.json())
           .then(data => {
@@ -201,8 +180,6 @@
             console.error("Error fetching city time:", error);
           });
       }
-
-      // Function to fetch the current time at the specified coordinates
       function fetchCityTimeByCoordinates(latitude, longitude) {
         // Use an appropriate API to get the current time at the specified coordinates
         // You can replace this with your preferred time API
@@ -219,8 +196,6 @@
             console.error("Error fetching city time:", error);
           });
       }
-
-      // Function to get a weather emoji based on weather conditions
       function getWeatherEmoji(weatherCondition) {
         const emojiMapping = {
           Clear: "☀️",
@@ -251,8 +226,6 @@
           return (temperature * 9) / 5 + 32;
         }
       }
-
-      // Function to update the temperature unit (Celsius/Fahrenheit)
       function updateTemperatureUnit() {
         isCelsius = !isCelsius; // Toggle the unit
         const temperatureElements = document.querySelectorAll(".temperature");
@@ -269,7 +242,6 @@
         const currentDate = new Date();
         document.getElementById("currentDate").textContent = `Current Date: ${currentDate.toDateString()}`;
 
-        // Update the current time every second
         setInterval(() => {
           const now = new Date();
           const currentTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
@@ -277,7 +249,6 @@
         }, 1000);
       }
 
-      // Define a function to generate random colors for cards
       function getRandomColor() {
         const letters = "0123456789ABCDEF";
         let color = "#";
