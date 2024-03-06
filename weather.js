@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
   const { city, latitude, longitude, units } = JSON.parse(event.body);
-  const apiKey = '3ed565296c19775878a64c31457d90b2';
+  const apiKey = process.env.OPENWEATHER_API_KEY; // Access API key from environment variable
   const apiUrl = latitude && longitude
     ? `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=${units}`
     : `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${units}`;
